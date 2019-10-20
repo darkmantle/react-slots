@@ -1,5 +1,11 @@
 .reel-image {
     width: 200px;
-    padding: 8px;
+    padding: 20px;
     background: #b1c5e2;
+}
+
+.reels {
+    background: #00000099;
+    margin-top: 20px;
+    border-radius: 4px 4px 0 0;
 }

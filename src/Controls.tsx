@@ -1,6 +1,7 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import './Controls.css';
+import {parseString} from "xml2js";
 
 // This function ensures number is always correct at 2 decimal places
 const createFloat = (input: number) => {
@@ -13,29 +14,40 @@ const Controls: React.FC<any> = ({ spin }) => {
     const [lastWin, setLastWin] = React.useState(0);
     const [stake, setStake] = React.useState(0.20);
 
-    let busy = false;
-
+    // Use API to get results
     const spinReels = () => {
-        busy = true;
-        spin();
+        fetch("http://localhost:8888/serve", { method: "POST", body: `<Request balance="${balance}" stake="${stake}" />` })
+            .then(res => res.text())
+            .then((body: string) => {
+                if (body.includes("Error!")) {
+                    // Do nothing due to API error. Return ensures nothing is updated.
+                    return;
+                };
+                parseString(body, (err, res) => {
+                    if (err) return;
+                    const money = res.Response.$;
+                    const tempReels = res.Response.SymbolGrid;
+                    spin(tempReels);
 
-        setBalance(createFloat(balance - stake));
+                    setBalance(parseFloat(money.balance));
+                    setLastWin(parseFloat(money.win));
+                })
+            }).catch(err => {
+                // Most likely network error - display alert
+                alert("There was an error, please try again");
+            })
     }
 
+    // Increase the stake by 10p
     const stakeUp = () => {
-        busy = true;
         if (stake < 1) setStake(createFloat(stake + 0.1));
     }
 
+    // Decrease the stake by 10p
     const stakeDown = () => {
-        busy = true;
         if (stake > 0.1) setStake(createFloat(stake - 0.1));
     }
 
-    React.useEffect(() => {
-        console.log(stake);
-        busy = false;
-    }, [balance, stake]);
 
     return (
         <div className="row mainRow">
@@ -45,9 +57,9 @@ const Controls: React.FC<any> = ({ spin }) => {
                 </div>
                 <div className="row">
                     <div className="col text-center d-lg-flex justify-content-lg-center align-items-lg-center">
-                        <button type="button" className="btn btn-info" style={{marginRight: "4px", fontSize: "18px", padding: "2px 6px"}} onClick={stakeDown}>-</button>
+                        <button type="button" className="btn btn-info" style={{ marginRight: "4px", fontSize: "18px", padding: "2px 6px" }} onClick={stakeDown}>-</button>
                         <h2 className="text-center border rounded money-box">{stake.toFixed(2)}</h2>
-                        <button type="button" className="btn btn-info" style={{marginLeft: "4px", fontSize: "18px", padding: "2px 6px"}} onClick={stakeUp}>+</button>
+                        <button type="button" className="btn btn-info" style={{ marginLeft: "4px", fontSize: "18px", padding: "2px 6px" }} onClick={stakeUp}>+</button>
                     </div>
                 </div>
             </div>
