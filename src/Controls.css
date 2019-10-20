@@ -1,0 +1,12 @@
+.money-box {
+    color: #ffd260;
+    text-shadow: 0px 0px 9px rgba(255,210,96,0.67), 0px 0px 9px rgba(255,210,96,0.67);
+    background-color: #292156;
+    border-radius: 3px;
+    border-width: 2px !important;
+    padding: 8px 16px;
+}
+
+.mainRow {
+    background: #000000DD;
+}
